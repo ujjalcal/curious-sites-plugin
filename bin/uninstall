@@ -23,15 +23,23 @@ if [[ -f "$KEY_FILE" ]]; then
   rmdir "$HOME/.curiouscirkits" 2>/dev/null || true
 fi
 
+# Remove skill symlinks
+SKILLS="portfolio-orchestrator portfolio-builder portfolio-reviewer portfolio-manager template-gallery domain-search domain-purchase domain-manager billing"
+for skill in $SKILLS; do
+  skill_dir="$HOME/.claude/skills/$skill"
+  if [[ -d "$skill_dir" ]]; then
+    rm -rf "$skill_dir"
+    echo "Removed skill: $skill"
+  fi
+done
+
 # Remove the plugin
 if [[ -d "$INSTALL_DIR" ]]; then
   rm -rf "$INSTALL_DIR"
   echo "Removed plugin: $INSTALL_DIR"
 fi
 
-# Note about CLAUDE.md cleanup
 echo ""
 echo "Uninstalled. All CuriousCirkits files have been removed."
 echo ""
-echo "Note: If you added CuriousCirkits to any project's CLAUDE.md"
-echo "(via 'csites init'), remove the '## CuriousCirkits' section manually."
+echo "Note: Remove the '## CuriousCirkits' section from any project's CLAUDE.md manually."

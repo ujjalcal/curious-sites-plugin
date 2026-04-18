@@ -54,6 +54,18 @@ else
   fi
 fi
 
+# Register skills with Claude Code
+# Creates ~/.claude/skills/<skill-name>/SKILL.md symlinks so Claude Code discovers them
+SKILLS_DIR="$SCRIPT_DIR/skills"
+CLAUDE_SKILLS="$HOME/.claude/skills"
+for skill_dir in "$SKILLS_DIR"/*/; do
+  skill_name="$(basename "$skill_dir")"
+  target_dir="$CLAUDE_SKILLS/$skill_name"
+  mkdir -p "$target_dir"
+  ln -sf "$skill_dir/SKILL.md" "$target_dir/SKILL.md"
+done
+echo "Registered 9 skills with Claude Code"
+
 # Auth
 echo ""
 if [[ -f "$HOME/.curiouscirkits/api-key" ]] || [[ -n "${CC_API_KEY:-}" ]]; then
