@@ -20,21 +20,17 @@ done
 chmod +x "$BIN_DIR/csites" "$BIN_DIR/uninstall"
 
 # Symlink csites into a directory on PATH
-LINKED=false
 LINK_TARGET="/usr/local/bin/csites"
 if [[ -L "$LINK_TARGET" || -e "$LINK_TARGET" ]]; then
   echo "Note: $LINK_TARGET already exists, skipping symlink."
-  LINKED=true
 else
   if ln -sf "$BIN_DIR/csites" "$LINK_TARGET" 2>/dev/null; then
     echo "Linked csites → $LINK_TARGET"
-    LINKED=true
   else
     # Fall back to ~/bin if /usr/local/bin needs sudo
     mkdir -p "$HOME/bin"
     ln -sf "$BIN_DIR/csites" "$HOME/bin/csites"
     echo "Linked csites → $HOME/bin/csites"
-    LINKED=true
 
     # Auto-add ~/bin to PATH in shell profile
     if [[ ":$PATH:" != *":$HOME/bin:"* ]]; then
@@ -47,7 +43,6 @@ else
         SHELL_RC="$HOME/.bash_profile"
       fi
       if [[ -n "$SHELL_RC" ]]; then
-        # Check if we already added it
         if ! grep -q '# CuriousCirkits' "$SHELL_RC" 2>/dev/null; then
           echo '' >> "$SHELL_RC"
           echo '# CuriousCirkits' >> "$SHELL_RC"
@@ -59,17 +54,16 @@ else
   fi
 fi
 
-# Add to project CLAUDE.md if a project dir was passed
-ORIGINAL_DIR="${CSITES_PROJECT_DIR:-}"
-if [[ -n "$ORIGINAL_DIR" ]] && [[ -d "$ORIGINAL_DIR" ]]; then
-  (cd "$ORIGINAL_DIR" && "$BIN_DIR/csites" init)
+# Create project workspace
+PROJECT_DIR="$HOME/curious-sites"
+if [[ ! -d "$PROJECT_DIR" ]]; then
+  mkdir -p "$PROJECT_DIR"
+  (cd "$PROJECT_DIR" && git init -q)
+  echo "Created project: $PROJECT_DIR"
 fi
+(cd "$PROJECT_DIR" && "$BIN_DIR/csites" init)
 
-echo ""
-echo "Setup complete."
-
-# Run auth setup using the full path (not the symlink, which may not
-# be on PATH in this shell session)
+# Auth
 echo ""
 if [[ -f "$HOME/.curiouscirkits/api-key" ]] || [[ -n "${CC_API_KEY:-}" ]]; then
   echo "Already authenticated."
@@ -80,16 +74,13 @@ else
   "$BIN_DIR/csites" auth setup
 fi
 
-# Final instructions — only if ~/bin isn't on PATH in this session
+# Done
+echo ""
+echo "Setup complete."
+echo ""
+echo "Your project is at: $PROJECT_DIR"
+echo "Open Claude Code there and say 'build me a portfolio'."
 echo ""
 if ! command -v csites &>/dev/null; then
-  echo "To use csites in this terminal, run:"
-  echo "  source ~/.zshrc"
-  echo ""
-  echo "Or use the full path:"
-  echo "  $BIN_DIR/csites"
-  echo ""
-  echo "New terminals will have csites on PATH automatically."
-else
-  echo "Ready. Run 'csites help' to see available commands."
+  echo "To use csites in this terminal: source ~/.zshrc"
 fi

@@ -13,25 +13,17 @@ One set of photos or text. Infinite possibilities. Tell your AI agent what you w
 
 **Requirements:** [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Git](https://git-scm.com/), `curl`, `jq`
 
-Open Claude Code from your project directory and paste this:
+Open Claude Code and paste this:
 
-> Install CuriousCirkits. Run these commands:
-> ```
-> git clone https://github.com/ujjalcal/curious-sites-plugin.git ~/.claude/skills/curious-sites
-> CSITES_PROJECT_DIR="$PWD" ~/.claude/skills/curious-sites/setup
-> ```
-> If the clone fails because the directory exists, run `cd ~/.claude/skills/curious-sites && git pull` first, then run the setup line.
-> After setup, add the CuriousCirkits section to this project's CLAUDE.md by running `csites init` from the project root.
+> Install CuriousCirkits: run `git clone https://github.com/ujjalcal/curious-sites-plugin.git ~/.claude/skills/curious-sites && ~/.claude/skills/curious-sites/setup`. If the clone fails because the directory already exists, run `cd ~/.claude/skills/curious-sites && git pull && ./setup` instead.
 
 Setup does everything:
-1. Symlinks the `csites` CLI onto your PATH (falls back to `~/bin` if `/usr/local/bin` needs sudo)
+1. Symlinks the `csites` CLI onto your PATH
 2. Adds `~/bin` to your shell profile if needed
-3. Adds a CuriousCirkits section to your project's `CLAUDE.md` (skill routing for Claude)
+3. Creates a `~/curious-sites` project with `CLAUDE.md` (skill routing for Claude)
 4. Runs `csites auth setup` to connect your account (opens browser)
 
-If `csites` isn't found after setup, run `source ~/.zshrc` to reload your PATH.
-
-After setup, say "build me a portfolio".
+After setup, open Claude Code in `~/curious-sites` and say "build me a portfolio".
 
 ### Add to another project
 
