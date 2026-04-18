@@ -25,12 +25,14 @@ CSITES_PROJECT_DIR="$PWD" ~/.claude/skills/curious-sites/setup
 ```
 
 Setup does everything:
-1. Symlinks the `csites` CLI onto your PATH
+1. Symlinks the `csites` CLI onto your PATH (falls back to `~/bin` if `/usr/local/bin` needs sudo)
 2. Adds `~/bin` to your shell profile if needed
-3. Adds a CuriousCirkits section to your project's `CLAUDE.md`
-4. Runs `csites auth setup` to connect your account
+3. Adds a CuriousCirkits section to your project's `CLAUDE.md` (skill routing for Claude)
+4. Runs `csites auth setup` to connect your account (opens browser)
 
-One command. After setup, say "build me a portfolio".
+If `csites` isn't found after setup, run `source ~/.zshrc` to reload your PATH.
+
+After setup, say "build me a portfolio".
 
 ### Add to another project
 

@@ -16,23 +16,27 @@ for cmd in curl jq; do
   fi
 done
 
-# Make CLI executable
-chmod +x "$BIN_DIR/csites"
+# Make executables
+chmod +x "$BIN_DIR/csites" "$BIN_DIR/uninstall"
 
 # Symlink csites into a directory on PATH
+LINKED=false
 LINK_TARGET="/usr/local/bin/csites"
 if [[ -L "$LINK_TARGET" || -e "$LINK_TARGET" ]]; then
   echo "Note: $LINK_TARGET already exists, skipping symlink."
-  echo "  The CLI is available at: $BIN_DIR/csites"
+  LINKED=true
 else
   if ln -sf "$BIN_DIR/csites" "$LINK_TARGET" 2>/dev/null; then
     echo "Linked csites → $LINK_TARGET"
+    LINKED=true
   else
     # Fall back to ~/bin if /usr/local/bin needs sudo
     mkdir -p "$HOME/bin"
     ln -sf "$BIN_DIR/csites" "$HOME/bin/csites"
     echo "Linked csites → $HOME/bin/csites"
-    # Auto-add ~/bin to PATH if not already there
+    LINKED=true
+
+    # Auto-add ~/bin to PATH in shell profile
     if [[ ":$PATH:" != *":$HOME/bin:"* ]]; then
       SHELL_RC=""
       if [[ -f "$HOME/.zshrc" ]]; then
@@ -43,22 +47,19 @@ else
         SHELL_RC="$HOME/.bash_profile"
       fi
       if [[ -n "$SHELL_RC" ]]; then
-        echo '' >> "$SHELL_RC"
-        echo '# CuriousCirkits' >> "$SHELL_RC"
-        echo 'export PATH="$HOME/bin:$PATH"' >> "$SHELL_RC"
-        echo "Added PATH to $SHELL_RC"
-        export PATH="$HOME/bin:$PATH"
-      else
-        echo "Add to your shell profile:"
-        echo "  export PATH=\"\$HOME/bin:\$PATH\""
+        # Check if we already added it
+        if ! grep -q '# CuriousCirkits' "$SHELL_RC" 2>/dev/null; then
+          echo '' >> "$SHELL_RC"
+          echo '# CuriousCirkits' >> "$SHELL_RC"
+          echo 'export PATH="$HOME/bin:$PATH"' >> "$SHELL_RC"
+          echo "Added PATH to $SHELL_RC (takes effect in new terminals)"
+        fi
       fi
     fi
   fi
 fi
 
-# Add to project CLAUDE.md if we're being run from inside a project
-# (detect by checking if the parent of ~/.claude/skills is reachable
-# and the user's CWD has a .git or CLAUDE.md)
+# Add to project CLAUDE.md if a project dir was passed
 ORIGINAL_DIR="${CSITES_PROJECT_DIR:-}"
 if [[ -n "$ORIGINAL_DIR" ]] && [[ -d "$ORIGINAL_DIR/.git" || -f "$ORIGINAL_DIR/CLAUDE.md" ]]; then
   (cd "$ORIGINAL_DIR" && "$BIN_DIR/csites" init)
@@ -66,9 +67,10 @@ fi
 
 echo ""
 echo "Setup complete."
-echo ""
 
-# Run auth setup automatically
+# Run auth setup using the full path (not the symlink, which may not
+# be on PATH in this shell session)
+echo ""
 if [[ -f "$HOME/.curiouscirkits/api-key" ]] || [[ -n "${CC_API_KEY:-}" ]]; then
   echo "Already authenticated."
   "$BIN_DIR/csites" auth status
@@ -76,4 +78,18 @@ else
   echo "Connecting your account..."
   echo ""
   "$BIN_DIR/csites" auth setup
+fi
+
+# Final instructions — only if ~/bin isn't on PATH in this session
+echo ""
+if ! command -v csites &>/dev/null; then
+  echo "To use csites in this terminal, run:"
+  echo "  source ~/.zshrc"
+  echo ""
+  echo "Or use the full path:"
+  echo "  $BIN_DIR/csites"
+  echo ""
+  echo "New terminals will have csites on PATH automatically."
+else
+  echo "Ready. Run 'csites help' to see available commands."
 fi
