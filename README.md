@@ -15,12 +15,19 @@ One set of photos or text. Infinite possibilities. Tell your AI agent what you w
 
 Open Claude Code from your project directory and paste this. Claude does the rest.
 
-> Install CuriousCirkits: run **`git clone https://github.com/ujjalcal/curious-sites-plugin.git ~/.claude/skills/curious-sites && CSITES_PROJECT_DIR="$PWD" ~/.claude/skills/curious-sites/setup`**
+> Install CuriousCirkits: run **`(if [ -d ~/.claude/skills/curious-sites ]; then cd ~/.claude/skills/curious-sites && git pull; else git clone https://github.com/ujjalcal/curious-sites-plugin.git ~/.claude/skills/curious-sites; fi) && CSITES_PROJECT_DIR="$PWD" ~/.claude/skills/curious-sites/setup`**
 
 Or run it yourself:
 
 ```bash
-git clone https://github.com/ujjalcal/curious-sites-plugin.git ~/.claude/skills/curious-sites
+# Clone (or update if already installed)
+if [ -d ~/.claude/skills/curious-sites ]; then
+  cd ~/.claude/skills/curious-sites && git pull
+else
+  git clone https://github.com/ujjalcal/curious-sites-plugin.git ~/.claude/skills/curious-sites
+fi
+
+# Run setup
 CSITES_PROJECT_DIR="$PWD" ~/.claude/skills/curious-sites/setup
 ```
 
