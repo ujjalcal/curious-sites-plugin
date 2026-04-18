@@ -15,7 +15,7 @@ One set of photos or text. Infinite possibilities. Tell your AI agent what you w
 
 Open Claude Code and paste this. Claude does the rest.
 
-> Install CuriousCirkits: run **`git clone https://github.com/ujjalcal/curious-sites-plugin.git ~/.claude/skills/curious-sites && ~/.claude/skills/curious-sites/setup`** then add a "CuriousCirkits" section to CLAUDE.md that says all CLI commands use `csites` and lists the available skills: portfolio-orchestrator, portfolio-builder, portfolio-reviewer, portfolio-manager, template-gallery, domain-search, domain-purchase, domain-manager, billing.
+> Install CuriousCirkits: run **`git clone https://github.com/ujjalcal/curious-sites-plugin.git ~/.claude/skills/curious-sites && ~/.claude/skills/curious-sites/setup`** then add a "CuriousCirkits" section to CLAUDE.md that says to use the CuriousCirkits skills for all portfolio work and lists the available skills: portfolio-orchestrator (default entry point), portfolio-builder, portfolio-reviewer, portfolio-manager, template-gallery, domain-search, domain-purchase, domain-manager, billing.
 
 If already installed, update with: `cd ~/.claude/skills/curious-sites && git pull && ./setup`
 
