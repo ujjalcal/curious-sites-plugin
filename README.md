@@ -13,27 +13,11 @@ One set of photos or text. Infinite possibilities. Tell your AI agent what you w
 
 **Requirements:** [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Git](https://git-scm.com/), `curl`, `jq`
 
-Open Claude Code and paste this:
+Open Claude Code and paste this. Claude does the rest.
 
-> Install CuriousCirkits: run `git clone https://github.com/ujjalcal/curious-sites-plugin.git ~/.claude/skills/curious-sites && ~/.claude/skills/curious-sites/setup`. If the clone fails because the directory already exists, run `cd ~/.claude/skills/curious-sites && git pull && ./setup` instead.
+> Install CuriousCirkits: run **`git clone https://github.com/ujjalcal/curious-sites-plugin.git ~/.claude/skills/curious-sites && ~/.claude/skills/curious-sites/setup`** then add a "CuriousCirkits" section to CLAUDE.md that says all CLI commands use `csites` and lists the available skills: portfolio-orchestrator, portfolio-builder, portfolio-reviewer, portfolio-manager, template-gallery, domain-search, domain-purchase, domain-manager, billing.
 
-Setup does everything:
-1. Symlinks the `csites` CLI onto your PATH
-2. Adds `~/bin` to your shell profile if needed
-3. Creates a `~/curious-sites` project with `CLAUDE.md` (skill routing for Claude)
-4. Runs `csites auth setup` to connect your account (opens browser)
-
-After setup, open Claude Code in `~/curious-sites` and say "build me a portfolio".
-
-### Add to another project
-
-From any project root:
-
-```bash
-csites init
-```
-
-This appends the CuriousCirkits skill routing block to that project's `CLAUDE.md`.
+If already installed, update with: `cd ~/.claude/skills/curious-sites && git pull && ./setup`
 
 ## See it work
 

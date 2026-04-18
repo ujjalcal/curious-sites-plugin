@@ -54,15 +54,6 @@ else
   fi
 fi
 
-# Create project workspace
-PROJECT_DIR="$HOME/curious-sites"
-if [[ ! -d "$PROJECT_DIR" ]]; then
-  mkdir -p "$PROJECT_DIR"
-  (cd "$PROJECT_DIR" && git init -q)
-  echo "Created project: $PROJECT_DIR"
-fi
-(cd "$PROJECT_DIR" && "$BIN_DIR/csites" init)
-
 # Auth
 echo ""
 if [[ -f "$HOME/.curiouscirkits/api-key" ]] || [[ -n "${CC_API_KEY:-}" ]]; then
@@ -77,10 +68,7 @@ fi
 # Done
 echo ""
 echo "Setup complete."
-echo ""
-echo "Your project is at: $PROJECT_DIR"
-echo "Open Claude Code there and say 'build me a portfolio'."
-echo ""
 if ! command -v csites &>/dev/null; then
+  echo ""
   echo "To use csites in this terminal: source ~/.zshrc"
 fi
