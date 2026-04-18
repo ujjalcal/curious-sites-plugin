@@ -56,6 +56,14 @@ else
   fi
 fi
 
+# Add to project CLAUDE.md if we're being run from inside a project
+# (detect by checking if the parent of ~/.claude/skills is reachable
+# and the user's CWD has a .git or CLAUDE.md)
+ORIGINAL_DIR="${CSITES_PROJECT_DIR:-}"
+if [[ -n "$ORIGINAL_DIR" ]] && [[ -d "$ORIGINAL_DIR/.git" || -f "$ORIGINAL_DIR/CLAUDE.md" ]]; then
+  (cd "$ORIGINAL_DIR" && "$BIN_DIR/csites" init)
+fi
+
 echo ""
 echo "Setup complete."
 echo ""

@@ -13,19 +13,34 @@ One set of photos or text. Infinite possibilities. Tell your AI agent what you w
 
 **Requirements:** [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Git](https://git-scm.com/), `curl`, `jq`
 
-Open Claude Code and paste this. Claude does the rest.
+Open Claude Code from your project directory and paste this. Claude does the rest.
 
-> Install CuriousCirkits: run **`git clone https://github.com/ujjalcal/curious-sites-plugin.git ~/.claude/skills/curious-sites && cd ~/.claude/skills/curious-sites && ./setup`** then add a "CuriousCirkits" section to CLAUDE.md that lists the available skills: portfolio-orchestrator, portfolio-builder, portfolio-reviewer, portfolio-manager, template-gallery, domain-search, domain-purchase, domain-manager, billing. Note that all CLI commands use `csites` (not `cc`).
+> Install CuriousCirkits: run **`git clone https://github.com/ujjalcal/curious-sites-plugin.git ~/.claude/skills/curious-sites && CSITES_PROJECT_DIR="$PWD" ~/.claude/skills/curious-sites/setup`**
 
 Or run it yourself:
 
 ```bash
-git clone https://github.com/ujjalcal/curious-sites-plugin.git ~/.claude/skills/curious-sites && cd ~/.claude/skills/curious-sites && ./setup
+git clone https://github.com/ujjalcal/curious-sites-plugin.git ~/.claude/skills/curious-sites
+CSITES_PROJECT_DIR="$PWD" ~/.claude/skills/curious-sites/setup
 ```
 
-Setup clones the repo into Claude Code's skills directory, symlinks the `csites` CLI onto your PATH, adds it to your shell profile if needed, and runs auth setup automatically. One command, fully installed.
+Setup does everything:
+1. Symlinks the `csites` CLI onto your PATH
+2. Adds `~/bin` to your shell profile if needed
+3. Adds a CuriousCirkits section to your project's `CLAUDE.md`
+4. Runs `csites auth setup` to connect your account
 
-After setup, say "build me a portfolio".
+One command. After setup, say "build me a portfolio".
+
+### Add to another project
+
+From any project root:
+
+```bash
+csites init
+```
+
+This appends the CuriousCirkits skill routing block to that project's `CLAUDE.md`.
 
 ## See it work
 

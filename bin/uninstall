@@ -29,5 +29,9 @@ if [[ -d "$INSTALL_DIR" ]]; then
   echo "Removed plugin: $INSTALL_DIR"
 fi
 
+# Note about CLAUDE.md cleanup
 echo ""
 echo "Uninstalled. All CuriousCirkits files have been removed."
+echo ""
+echo "Note: If you added CuriousCirkits to any project's CLAUDE.md"
+echo "(via 'csites init'), remove the '## CuriousCirkits' section manually."

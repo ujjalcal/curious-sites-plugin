@@ -43,6 +43,7 @@ Usage:
   csites workflow complete <id> <stepId>     Complete a workflow step
   csites publish <portfolioId>              Publish (reads JSON payload from stdin)
   csites images upload <file> <portfolioId> Upload an image
+  csites init                               Add CuriousCirkits to project CLAUDE.md
   csites help                               Show this help
 USAGE
 }
@@ -195,6 +196,46 @@ cmd_portfolios_update() {
   api PATCH "/api/portfolios/$portfolio_id" -d "$payload"
 }
 
+CLAUDE_MD_BLOCK='## CuriousCirkits
+
+Portfolio builder plugin. All CLI commands use `csites`.
+
+Available skills: portfolio-orchestrator (default entry point), portfolio-builder,
+portfolio-reviewer, portfolio-manager, template-gallery, domain-search,
+domain-purchase, domain-manager, billing.
+
+Read the skill file in `~/.claude/skills/curious-sites/skills/<skill-name>/SKILL.md`
+before executing a workflow. Use `portfolio-orchestrator` when the user says "hi",
+"help", or anything vague about portfolios.
+
+Rules: propose actions (never ask "what would you like to do?"), one question at a
+time, confirm before destructive actions or spending money, no technical jargon
+(no UUIDs, no subdomain paths).'
+
+cmd_init() {
+  local target="CLAUDE.md"
+
+  # Check if we're in a git repo or have a CLAUDE.md
+  if [[ ! -d ".git" ]] && [[ ! -f "$target" ]]; then
+    echo "Not in a project directory (no .git or CLAUDE.md found)." >&2
+    echo "Run this from your project root." >&2
+    exit 1
+  fi
+
+  # Check if already added
+  if [[ -f "$target" ]] && grep -q "## CuriousCirkits" "$target" 2>/dev/null; then
+    echo "CuriousCirkits already in $target"
+    return
+  fi
+
+  # Append to CLAUDE.md (create if needed)
+  if [[ -f "$target" ]]; then
+    echo "" >> "$target"
+  fi
+  echo "$CLAUDE_MD_BLOCK" >> "$target"
+  echo "Added CuriousCirkits to $target"
+}
+
 # --- Routing ---
 case "${1:-help}" in
   auth)
@@ -232,6 +273,7 @@ case "${1:-help}" in
       upload) cmd_images_upload "${3:-}" "${4:-}" ;;
       *)      echo "Usage: csites images {list|upload}" >&2; exit 1 ;;
     esac ;;
+  init) cmd_init ;;
   help|--help|-h) cmd_help ;;
   *) echo "Unknown command: $1. Run 'csites help' for usage." >&2; exit 1 ;;
 esac
