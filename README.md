@@ -13,11 +13,19 @@ One set of photos or text. Infinite possibilities. Tell your AI agent what you w
 
 **Requirements:** [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Git](https://git-scm.com/), `curl`, `jq`
 
+Open Claude Code and paste this. Claude does the rest.
+
+> Install CuriousCirkits: run **`git clone https://github.com/ujjalcal/curious-sites-plugin.git ~/.claude/skills/curious-sites && cd ~/.claude/skills/curious-sites && ./setup`** then add a "CuriousCirkits" section to CLAUDE.md that lists the available skills: portfolio-orchestrator, portfolio-builder, portfolio-reviewer, portfolio-manager, template-gallery, domain-search, domain-purchase, domain-manager, billing. Note that all CLI commands use `csites` (not `cc`).
+
+Or run it yourself:
+
 ```bash
 git clone https://github.com/ujjalcal/curious-sites-plugin.git ~/.claude/skills/curious-sites && cd ~/.claude/skills/curious-sites && ./setup
 ```
 
-That's it. Open Claude Code and say "build me a portfolio".
+Setup clones the repo into Claude Code's skills directory, symlinks the `csites` CLI onto your PATH, adds it to your shell profile if needed, and runs auth setup automatically. One command, fully installed.
+
+After setup, say "build me a portfolio".
 
 ## See it work
 
@@ -142,11 +150,10 @@ The agent is the designer. You are the client. Everything in between is plumbing
 ## Uninstall
 
 ```bash
-rm -rf ~/.claude/skills/curious-sites
-# If symlinked:
-rm -f /usr/local/bin/csites 2>/dev/null
-rm -f ~/bin/csites 2>/dev/null
+~/.claude/skills/curious-sites/bin/uninstall
 ```
+
+Removes the CLI symlink, API key, and plugin directory. Clean.
 
 ## License
 

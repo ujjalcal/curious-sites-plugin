@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+INSTALL_DIR="$HOME/.claude/skills/curious-sites"
+
+echo "CuriousCirkits Uninstall"
+echo "========================"
+echo ""
+
+# Remove symlinks
+for target in /usr/local/bin/csites "$HOME/bin/csites"; do
+  if [[ -L "$target" ]]; then
+    rm -f "$target"
+    echo "Removed symlink: $target"
+  fi
+done
+
+# Remove API key
+KEY_FILE="$HOME/.curiouscirkits/api-key"
+if [[ -f "$KEY_FILE" ]]; then
+  rm -f "$KEY_FILE"
+  echo "Removed API key: $KEY_FILE"
+  rmdir "$HOME/.curiouscirkits" 2>/dev/null || true
+fi
+
+# Remove the plugin
+if [[ -d "$INSTALL_DIR" ]]; then
+  rm -rf "$INSTALL_DIR"
+  echo "Removed plugin: $INSTALL_DIR"
+fi
+
+echo ""
+echo "Uninstalled. All CuriousCirkits files have been removed."

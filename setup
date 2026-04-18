@@ -32,10 +32,26 @@ else
     mkdir -p "$HOME/bin"
     ln -sf "$BIN_DIR/csites" "$HOME/bin/csites"
     echo "Linked csites → $HOME/bin/csites"
+    # Auto-add ~/bin to PATH if not already there
     if [[ ":$PATH:" != *":$HOME/bin:"* ]]; then
-      echo ""
-      echo "Add to your shell profile:"
-      echo "  export PATH=\"\$HOME/bin:\$PATH\""
+      SHELL_RC=""
+      if [[ -f "$HOME/.zshrc" ]]; then
+        SHELL_RC="$HOME/.zshrc"
+      elif [[ -f "$HOME/.bashrc" ]]; then
+        SHELL_RC="$HOME/.bashrc"
+      elif [[ -f "$HOME/.bash_profile" ]]; then
+        SHELL_RC="$HOME/.bash_profile"
+      fi
+      if [[ -n "$SHELL_RC" ]]; then
+        echo '' >> "$SHELL_RC"
+        echo '# CuriousCirkits' >> "$SHELL_RC"
+        echo 'export PATH="$HOME/bin:$PATH"' >> "$SHELL_RC"
+        echo "Added PATH to $SHELL_RC"
+        export PATH="$HOME/bin:$PATH"
+      else
+        echo "Add to your shell profile:"
+        echo "  export PATH=\"\$HOME/bin:\$PATH\""
+      fi
     fi
   fi
 fi
@@ -43,4 +59,13 @@ fi
 echo ""
 echo "Setup complete."
 echo ""
-echo "Next: run 'csites auth setup' to connect your account."
+
+# Run auth setup automatically
+if [[ -f "$HOME/.curiouscirkits/api-key" ]] || [[ -n "${CC_API_KEY:-}" ]]; then
+  echo "Already authenticated."
+  "$BIN_DIR/csites" auth status
+else
+  echo "Connecting your account..."
+  echo ""
+  "$BIN_DIR/csites" auth setup
+fi
