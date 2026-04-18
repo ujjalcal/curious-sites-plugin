@@ -5,15 +5,10 @@ One set of photos or text. Infinite possibilities. Your AI agent builds the port
 ## Install
 
 ```bash
-# Clone the plugin
-git clone https://github.com/ujjalcal/curious-sites-plugin.git ~/.curiouscirkits
-
-# Add to your PATH
-export PATH="$HOME/.curiouscirkits/bin:$PATH"
-
-# Authenticate (opens browser)
-cc auth setup
+git clone https://github.com/ujjalcal/curious-sites-plugin.git ~/.claude/skills/curious-sites && cd ~/.claude/skills/curious-sites && ./setup
 ```
+
+That's it. Open Claude Code and say "build me a portfolio".
 
 ## What you get
 
@@ -56,7 +51,7 @@ cc portfolios content {id}                 Get published HTML/CSS
 cc portfolios get {id}                     Get portfolio details
 cc portfolios update {id} --name "Name"    Update portfolio
 cc portfolios delete {id}                  Delete a portfolio
-cc publish {id}                            Publish (reads JSON from stdin)
+cc publish {id}                            Publish (reads JSON payload from stdin)
 cc images upload {file} {id}               Upload an image
 cc images list --portfolio {id}            List uploaded images
 cc workflow get {id}                       Get workflow state
@@ -72,13 +67,6 @@ Agent → Skill (informs) → CLI (transport) → API (facade) → Engine → DB
 ```
 
 Skills teach operation names. The CLI maps them to HTTP. The API does the work. You never see the engine.
-
-## For Claude Code
-
-Copy skills to your project:
-```bash
-cp -r ~/.curiouscirkits/skills/* .claude/skills/
-```
 
 ## License
 
