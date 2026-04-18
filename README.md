@@ -13,23 +13,15 @@ One set of photos or text. Infinite possibilities. Tell your AI agent what you w
 
 **Requirements:** [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Git](https://git-scm.com/), `curl`, `jq`
 
-Open Claude Code from your project directory and paste this. Claude does the rest.
+Open Claude Code from your project directory and paste this:
 
-> Install CuriousCirkits: run **`(if [ -d ~/.claude/skills/curious-sites ]; then cd ~/.claude/skills/curious-sites && git pull; else git clone https://github.com/ujjalcal/curious-sites-plugin.git ~/.claude/skills/curious-sites; fi) && CSITES_PROJECT_DIR="$PWD" ~/.claude/skills/curious-sites/setup`**
-
-Or run it yourself:
-
-```bash
-# Clone (or update if already installed)
-if [ -d ~/.claude/skills/curious-sites ]; then
-  cd ~/.claude/skills/curious-sites && git pull
-else
-  git clone https://github.com/ujjalcal/curious-sites-plugin.git ~/.claude/skills/curious-sites
-fi
-
-# Run setup
-CSITES_PROJECT_DIR="$PWD" ~/.claude/skills/curious-sites/setup
-```
+> Install CuriousCirkits. Run these commands:
+> ```
+> git clone https://github.com/ujjalcal/curious-sites-plugin.git ~/.claude/skills/curious-sites
+> CSITES_PROJECT_DIR="$PWD" ~/.claude/skills/curious-sites/setup
+> ```
+> If the clone fails because the directory exists, run `cd ~/.claude/skills/curious-sites && git pull` first, then run the setup line.
+> After setup, add the CuriousCirkits section to this project's CLAUDE.md by running `csites init` from the project root.
 
 Setup does everything:
 1. Symlinks the `csites` CLI onto your PATH (falls back to `~/bin` if `/usr/local/bin` needs sudo)
