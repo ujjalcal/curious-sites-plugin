@@ -61,7 +61,7 @@ fi
 
 # Add to project CLAUDE.md if a project dir was passed
 ORIGINAL_DIR="${CSITES_PROJECT_DIR:-}"
-if [[ -n "$ORIGINAL_DIR" ]] && [[ -d "$ORIGINAL_DIR/.git" || -f "$ORIGINAL_DIR/CLAUDE.md" ]]; then
+if [[ -n "$ORIGINAL_DIR" ]] && [[ -d "$ORIGINAL_DIR" ]]; then
   (cd "$ORIGINAL_DIR" && "$BIN_DIR/csites" init)
 fi
 

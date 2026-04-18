@@ -215,25 +215,18 @@ time, confirm before destructive actions or spending money, no technical jargon
 cmd_init() {
   local target="CLAUDE.md"
 
-  # Check if we're in a git repo or have a CLAUDE.md
-  if [[ ! -d ".git" ]] && [[ ! -f "$target" ]]; then
-    echo "Not in a project directory (no .git or CLAUDE.md found)." >&2
-    echo "Run this from your project root." >&2
-    exit 1
-  fi
-
   # Check if already added
   if [[ -f "$target" ]] && grep -q "## CuriousCirkits" "$target" 2>/dev/null; then
     echo "CuriousCirkits already in $target"
     return
   fi
 
-  # Append to CLAUDE.md (create if needed)
+  # Append to CLAUDE.md (create if it doesn't exist)
   if [[ -f "$target" ]]; then
     echo "" >> "$target"
   fi
   echo "$CLAUDE_MD_BLOCK" >> "$target"
-  echo "Added CuriousCirkits to $target"
+  echo "Added CuriousCirkits to $(pwd)/$target"
 }
 
 # --- Routing ---
