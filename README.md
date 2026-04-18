@@ -165,11 +165,17 @@ The agent is the designer. You are the client. Everything in between is plumbing
 
 ## Uninstall
 
+Run the uninstall script:
+
 ```bash
 ~/.claude/skills/curious-sites/bin/uninstall
 ```
 
-Removes the CLI symlink, API key, and plugin directory. Clean.
+Or paste this into Claude Code / OpenClaw:
+
+> Uninstall CuriousCirkits: run `~/.claude/skills/curious-sites/bin/uninstall`. Then remove the `## CuriousCirkits` section from this project's CLAUDE.md.
+
+This removes the CLI symlink, API key, and plugin directory.
 
 ## License
 
