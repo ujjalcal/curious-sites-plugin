@@ -1,8 +1,17 @@
-# CuriousCirkits Portfolio Plugin
+# CuriousCirkits
 
-One set of photos or text. Infinite possibilities. Your AI agent builds the portfolio. You just talk.
+Your AI agent builds the portfolio. You just talk.
 
-## Install
+One set of photos or text. Infinite possibilities. Tell your AI agent what you want — a portfolio for grad school, a freelance showcase, a personal brand page — and it designs, builds, publishes, and manages the whole thing. You never touch HTML. You never deploy anything. You just have a conversation.
+
+**Who this is for:**
+- **Students** applying to grad school, internships, or jobs — stand out with a real portfolio
+- **Freelancers and creatives** — showcase your work without learning web dev
+- **Anyone** who wants a personal site but doesn't want to build one
+
+## Install — 30 seconds
+
+**Requirements:** [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Git](https://git-scm.com/), `curl`, `jq`
 
 ```bash
 git clone https://github.com/ujjalcal/curious-sites-plugin.git ~/.claude/skills/curious-sites && cd ~/.claude/skills/curious-sites && ./setup
@@ -10,54 +19,110 @@ git clone https://github.com/ujjalcal/curious-sites-plugin.git ~/.claude/skills/
 
 That's it. Open Claude Code and say "build me a portfolio".
 
-## What you get
+## See it work
 
-9 skills that teach any AI agent to build, publish, and manage portfolio websites:
+```
+You:    Build me a portfolio for my job search.
 
-| Skill | What it does |
-|-------|-------------|
-| portfolio-orchestrator | Reads state, proposes action plans, drives to completion |
-| portfolio-builder | Builds sites from messy inputs (resume, sketch, photos, conversation) |
-| portfolio-reviewer | Reviews quality, gives specific feedback |
-| portfolio-manager | List, rename, clone, delete portfolios |
-| template-gallery | Browse starter templates |
-| domain-search | Find available domains with pricing |
-| domain-purchase | Register + DNS setup |
-| domain-manager | Unified domain lifecycle |
-| billing | Stripe checkout for domain payments |
+Claude: I'll set that up. What's your name?
+
+You:    Priya Sharma. I'm a product designer with 4 years of experience.
+
+Claude: [creates portfolio]
+        [asks about your work, projects, style preferences]
+        [writes HTML/CSS/JS — a full responsive portfolio]
+        [publishes]
+        → Live at portfolios.curiouscirkits.com/p/priya-sharma
+
+You:    Can you review it? I want a recruiter's perspective.
+
+Claude: [reads the published site]
+        Content: 8/10 — strong project descriptions, missing quantified impact
+        Visual: 7/10 — clean hierarchy, hero section needs more contrast
+        Audience fit: 9/10 — good for product design recruiters
+        Suggestions:
+        1. Add metrics ("reduced onboarding time by 30%")
+        2. Make the hero image full-bleed
+        3. Add a "Currently exploring" section
+
+You:    Make those changes.
+
+Claude: [updates the portfolio, republishes]
+        → Changes live.
+
+You:    I want a custom domain. priyasharma.design.
+
+Claude: [searches domain availability]
+        priyasharma.design is available — $12/year
+        Want me to register it?
+
+You:    Yes.
+
+Claude: [opens Stripe checkout → you pay]
+        [registers domain → sets up DNS]
+        → priyasharma.design is live.
+```
+
+Five minutes. A published portfolio with a custom domain. No code, no deploy, no config files.
+
+## The 9 skills
+
+Skills are markdown files that teach your AI agent how to use CuriousCirkits. The agent reads them and knows what to do.
+
+| Skill | Your specialist | What they do |
+|-------|----------------|--------------|
+| `portfolio-orchestrator` | **Project Manager** | Reads all your portfolio and domain state, proposes what to do next, drives to completion. The conductor. |
+| `portfolio-builder` | **Designer + Developer** | Builds sites from messy inputs — a resume, a conversation, photos, a LinkedIn URL. Multi-phase: gather info → design → build → publish. |
+| `portfolio-reviewer` | **Design Critic** | Scores your portfolio on 5 dimensions (content, writing, visual, audience, technical). Offers recruiter/investor/professor perspectives. |
+| `portfolio-manager` | **Site Admin** | List, rename, clone, delete portfolios. Rebind domains. Manage what you've built. |
+| `template-gallery` | **Curator** | Browse 10 starter templates (Minimal, Executive, Creative, Developer, Academic, and more). |
+| `domain-search` | **Domain Scout** | Search available domains with budget awareness. Recommends TLDs based on your use case. |
+| `domain-purchase` | **Registrar** | Full domain registration: Stripe payment → AWS Route 53 → Cloudflare DNS → verification. |
+| `domain-manager` | **DNS Admin** | Unified domain lifecycle — search, purchase, DNS setup, bind/unbind, ongoing management. |
+| `billing` | **Payments** | Stripe Checkout for domain purchases. Creates sessions, verifies payment. |
 
 ## How it works
 
 ```
-You: "build me a portfolio"
-
-Agent reads the skill → learns operation names
-Agent calls: cc portfolios create --name "Your Name"
-Agent writes HTML/CSS/JS → your portfolio
-Agent calls: cc publish {id}
-→ live at portfolios.curiouscirkits.com/p/your-name
+You talk to your AI agent
+  → Agent reads the skill (learns what operations exist)
+  → Agent calls the CLI (csites portfolios create, csites publish, etc.)
+  → CLI sends HTTP requests to the API
+  → API does the work (create, publish, DNS, payments)
+  → You get a live portfolio
 ```
 
-The agent is the designer. The CLI is the transport. The API does the work.
+Skills teach operation names. The CLI is the transport. The API does the work. You never see the engine.
 
-## CLI operations
+## CLI reference
 
 ```
-cc auth setup                              Set up your account (opens browser)
-cc auth status                             Check connection
-cc portfolios summary                      List all portfolios
-cc portfolios create --name "Name"         Create a new portfolio
-cc portfolios content {id}                 Get published HTML/CSS
-cc portfolios get {id}                     Get portfolio details
-cc portfolios update {id} --name "Name"    Update portfolio
-cc portfolios delete {id}                  Delete a portfolio
-cc publish {id}                            Publish (reads JSON payload from stdin)
-cc images upload {file} {id}               Upload an image
-cc images list --portfolio {id}            List uploaded images
-cc workflow get {id}                       Get workflow state
-cc workflow complete {id} {step}           Complete a workflow step
-cc domains search --name "Name"            Search available domains
-cc domains list                            List domain bindings
+SETUP
+  csites auth setup                              Set up your account (opens browser)
+  csites auth status                             Check connection
+
+PORTFOLIOS
+  csites portfolios summary                      List all portfolios
+  csites portfolios create --name "Name"         Create a new portfolio
+  csites portfolios content {id}                 Get published HTML/CSS
+  csites portfolios get {id}                     Get portfolio details
+  csites portfolios update {id} --name "Name"    Update portfolio
+  csites portfolios delete {id}                  Delete a portfolio
+
+PUBLISH
+  csites publish {id}                            Publish (reads JSON payload from stdin)
+
+IMAGES
+  csites images upload {file} {id}               Upload an image
+  csites images list --portfolio {id}            List uploaded images
+
+WORKFLOW
+  csites workflow get {id}                       Get workflow state
+  csites workflow complete {id} {step}           Complete a workflow step
+
+DOMAINS
+  csites domains search --name "Name"            Search available domains
+  csites domains list                            List domain bindings
 ```
 
 ## Architecture
@@ -66,8 +131,23 @@ cc domains list                            List domain bindings
 Agent → Skill (informs) → CLI (transport) → API (facade) → Engine → DB
 ```
 
-Skills teach operation names. The CLI maps them to HTTP. The API does the work. You never see the engine.
+The plugin has three layers:
+
+1. **Skills** (9 markdown files) — teach the agent what operations exist and how to chain them
+2. **CLI** (`bin/csites`) — a bash script that maps commands to HTTP calls against the API
+3. **API** (`api.curiouscirkits.com`) — the backend that does the actual work
+
+The agent is the designer. You are the client. Everything in between is plumbing.
+
+## Uninstall
+
+```bash
+rm -rf ~/.claude/skills/curious-sites
+# If symlinked:
+rm -f /usr/local/bin/csites 2>/dev/null
+rm -f ~/bin/csites 2>/dev/null
+```
 
 ## License
 
-MIT
+MIT. Free. Go build something.

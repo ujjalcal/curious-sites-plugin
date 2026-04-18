@@ -17,21 +17,21 @@ for cmd in curl jq; do
 done
 
 # Make CLI executable
-chmod +x "$BIN_DIR/cc"
+chmod +x "$BIN_DIR/csites"
 
-# Symlink cc into a directory on PATH
-LINK_TARGET="/usr/local/bin/cc"
+# Symlink csites into a directory on PATH
+LINK_TARGET="/usr/local/bin/csites"
 if [[ -L "$LINK_TARGET" || -e "$LINK_TARGET" ]]; then
   echo "Note: $LINK_TARGET already exists, skipping symlink."
-  echo "  The CLI is available at: $BIN_DIR/cc"
+  echo "  The CLI is available at: $BIN_DIR/csites"
 else
-  if ln -sf "$BIN_DIR/cc" "$LINK_TARGET" 2>/dev/null; then
-    echo "Linked cc → $LINK_TARGET"
+  if ln -sf "$BIN_DIR/csites" "$LINK_TARGET" 2>/dev/null; then
+    echo "Linked csites → $LINK_TARGET"
   else
     # Fall back to ~/bin if /usr/local/bin needs sudo
     mkdir -p "$HOME/bin"
-    ln -sf "$BIN_DIR/cc" "$HOME/bin/cc"
-    echo "Linked cc → $HOME/bin/cc"
+    ln -sf "$BIN_DIR/csites" "$HOME/bin/csites"
+    echo "Linked csites → $HOME/bin/csites"
     if [[ ":$PATH:" != *":$HOME/bin:"* ]]; then
       echo ""
       echo "Add to your shell profile:"
@@ -43,4 +43,4 @@ fi
 echo ""
 echo "Setup complete."
 echo ""
-echo "Next: run 'cc auth setup' to connect your account."
+echo "Next: run 'csites auth setup' to connect your account."

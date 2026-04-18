@@ -11,7 +11,7 @@ get_api_key() {
     cat "$KEY_FILE"
   else
     echo "Error: No API key found." >&2
-    echo "Set CC_API_KEY or run: cc auth setup" >&2
+    echo "Set CC_API_KEY or run: csites auth setup" >&2
     exit 1
   fi
 }
@@ -25,25 +25,25 @@ api() {
 }
 cmd_help() {
   cat <<'USAGE'
-cc — CuriousCirkits CLI
+csites — CuriousCirkits CLI
 
 Usage:
-  cc auth setup                         Set up API key via device flow
-  cc auth status                        Check API key and test connection
-  cc portfolios summary                 List all portfolios
-  cc portfolios content <portfolioId>   Get published HTML/CSS/themes
-  cc portfolios create --name "Name"    Create a new portfolio
-  cc portfolios delete <portfolioId>    Delete a portfolio
-  cc portfolios update <id> [--name N] [--subdomain S]  Update portfolio
-  cc portfolios get <portfolioId>       Get portfolio details
-  cc images list [--portfolio <id>]     List uploaded images
-  cc workflow get <portfolioId>         Get workflow state
-  cc domains search --name "Name"       Search available domains
-  cc domains list                       List domain bindings
-  cc workflow complete <id> <stepId>     Complete a workflow step
-  cc publish <portfolioId>              Publish (reads JSON payload from stdin)
-  cc images upload <file> <portfolioId> Upload an image
-  cc help                               Show this help
+  csites auth setup                         Set up API key via device flow
+  csites auth status                        Check API key and test connection
+  csites portfolios summary                 List all portfolios
+  csites portfolios content <portfolioId>   Get published HTML/CSS/themes
+  csites portfolios create --name "Name"    Create a new portfolio
+  csites portfolios delete <portfolioId>    Delete a portfolio
+  csites portfolios update <id> [--name N] [--subdomain S]  Update portfolio
+  csites portfolios get <portfolioId>       Get portfolio details
+  csites images list [--portfolio <id>]     List uploaded images
+  csites workflow get <portfolioId>         Get workflow state
+  csites domains search --name "Name"       Search available domains
+  csites domains list                       List domain bindings
+  csites workflow complete <id> <stepId>     Complete a workflow step
+  csites publish <portfolioId>              Publish (reads JSON payload from stdin)
+  csites images upload <file> <portfolioId> Upload an image
+  csites help                               Show this help
 USAGE
 }
 cmd_auth_setup() {
@@ -77,7 +77,7 @@ cmd_auth_status() {
   elif [[ -f "$KEY_FILE" ]]; then
     echo "API key found at $KEY_FILE"
   else
-    echo "No API key configured. Run: cc auth setup"
+    echo "No API key configured. Run: csites auth setup"
     exit 1
   fi
   echo "Testing connection..."
@@ -94,22 +94,22 @@ cmd_portfolios_summary() {
 }
 
 cmd_portfolios_content() {
-  local portfolio_id="${1:?Usage: cc portfolios content <portfolioId>}"
+  local portfolio_id="${1:?Usage: csites portfolios content <portfolioId>}"
   api GET "/api/portfolios/$portfolio_id/content"
 }
 
 cmd_portfolios_get() {
-  local portfolio_id="${1:?Usage: cc portfolios get <portfolioId>}"
+  local portfolio_id="${1:?Usage: csites portfolios get <portfolioId>}"
   api GET "/api/portfolios/$portfolio_id"
 }
 
 cmd_portfolios_delete() {
-  local portfolio_id="${1:?Usage: cc portfolios delete <portfolioId>}"
+  local portfolio_id="${1:?Usage: csites portfolios delete <portfolioId>}"
   api DELETE "/api/portfolios/$portfolio_id"
 }
 
 cmd_workflow_get() {
-  local portfolio_id="${1:?Usage: cc workflow get <portfolioId>}"
+  local portfolio_id="${1:?Usage: csites workflow get <portfolioId>}"
   api GET "/api/workflow/$portfolio_id"
 }
 
@@ -122,7 +122,7 @@ cmd_domains_search() {
       *) echo "Unknown option: $1" >&2; exit 1 ;;
     esac
   done
-  [[ -z "$name" ]] && { echo "Usage: cc domains search --name \"Name\" [--budget N]" >&2; exit 1; }
+  [[ -z "$name" ]] && { echo "Usage: csites domains search --name \"Name\" [--budget N]" >&2; exit 1; }
   api POST /api/domains/search -d "{\"name\":\"$name\",\"budget\":$budget}"
 }
 
@@ -138,19 +138,19 @@ cmd_portfolios_create() {
       *) echo "Unknown option: $1" >&2; exit 1 ;;
     esac
   done
-  [[ -z "$name" ]] && { echo "Usage: cc portfolios create --name \"Name\"" >&2; exit 1; }
+  [[ -z "$name" ]] && { echo "Usage: csites portfolios create --name \"Name\"" >&2; exit 1; }
   api POST /api/portfolios/create -H "Accept: application/json" -d "{\"name\":\"$name\"}"
 }
 
 cmd_workflow_complete() {
-  local portfolio_id="${1:?Usage: cc workflow complete <portfolioId> <stepId>}"
-  local step_id="${2:?Usage: cc workflow complete <portfolioId> <stepId>}"
+  local portfolio_id="${1:?Usage: csites workflow complete <portfolioId> <stepId>}"
+  local step_id="${2:?Usage: csites workflow complete <portfolioId> <stepId>}"
   api POST "/api/workflow/$portfolio_id" \
     -d "{\"action\":\"complete\",\"step_id\":\"$step_id\"}"
 }
 
 cmd_publish() {
-  local portfolio_id="${1:?Usage: cc publish <portfolioId> (reads JSON from stdin)}"
+  local portfolio_id="${1:?Usage: csites publish <portfolioId> (reads JSON from stdin)}"
   local payload merged
   payload=$(cat)
   merged=$(echo "$payload" | jq -c ". + {\"portfolioId\":\"$portfolio_id\"}")
@@ -173,8 +173,8 @@ cmd_images_list() {
 }
 
 cmd_images_upload() {
-  local filepath="${1:?Usage: cc images upload <filepath> <portfolioId>}"
-  local portfolio_id="${2:?Usage: cc images upload <filepath> <portfolioId>}"
+  local filepath="${1:?Usage: csites images upload <filepath> <portfolioId>}"
+  local portfolio_id="${2:?Usage: csites images upload <filepath> <portfolioId>}"
   curl -sf -X POST "$BASE_URL/api/images" \
     -H "Authorization: Bearer $(get_api_key)" \
     -F "file=@$filepath" \
@@ -182,7 +182,7 @@ cmd_images_upload() {
 }
 
 cmd_portfolios_update() {
-  local portfolio_id="${1:?Usage: cc portfolios update <portfolioId> [--name \"Name\"] [--subdomain \"sub\"]}"
+  local portfolio_id="${1:?Usage: csites portfolios update <portfolioId> [--name \"Name\"] [--subdomain \"sub\"]}"
   shift
   local payload="{}"
   while [[ $# -gt 0 ]]; do
@@ -201,7 +201,7 @@ case "${1:-help}" in
     case "${2:-}" in
       setup)  cmd_auth_setup ;;
       status) cmd_auth_status ;;
-      *)      echo "Usage: cc auth {setup|status}" >&2; exit 1 ;;
+      *)      echo "Usage: csites auth {setup|status}" >&2; exit 1 ;;
     esac ;;
   portfolios)
     case "${2:-}" in
@@ -211,27 +211,27 @@ case "${1:-help}" in
       delete)  cmd_portfolios_delete "${3:-}" ;;
       update)  shift 2; cmd_portfolios_update "$@" ;;
       create)  shift 2; cmd_portfolios_create "$@" ;;
-      *)       echo "Usage: cc portfolios {summary|content|get|delete|update|create}" >&2; exit 1 ;;
+      *)       echo "Usage: csites portfolios {summary|content|get|delete|update|create}" >&2; exit 1 ;;
     esac ;;
   workflow)
     case "${2:-}" in
       get)      cmd_workflow_get "${3:-}" ;;
       complete) cmd_workflow_complete "${3:-}" "${4:-}" ;;
-      *)        echo "Usage: cc workflow {get|complete} <id> [<stepId>]" >&2; exit 1 ;;
+      *)        echo "Usage: csites workflow {get|complete} <id> [<stepId>]" >&2; exit 1 ;;
     esac ;;
   domains)
     case "${2:-}" in
       search) shift 2; cmd_domains_search "$@" ;;
       list)   cmd_domains_list ;;
-      *)      echo "Usage: cc domains {search|list}" >&2; exit 1 ;;
+      *)      echo "Usage: csites domains {search|list}" >&2; exit 1 ;;
     esac ;;
   publish)  cmd_publish "${2:-}" ;;
   images)
     case "${2:-}" in
       list)   shift 2; cmd_images_list "$@" ;;
       upload) cmd_images_upload "${3:-}" "${4:-}" ;;
-      *)      echo "Usage: cc images {list|upload}" >&2; exit 1 ;;
+      *)      echo "Usage: csites images {list|upload}" >&2; exit 1 ;;
     esac ;;
   help|--help|-h) cmd_help ;;
-  *) echo "Unknown command: $1. Run 'cc help' for usage." >&2; exit 1 ;;
+  *) echo "Unknown command: $1. Run 'csites help' for usage." >&2; exit 1 ;;
 esac
