@@ -1,0 +1,237 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+BASE_URL="${CC_API_URL:-https://api.curiouscirkits.com}"
+KEY_FILE="$HOME/.curiouscirkits/api-key"
+
+get_api_key() {
+  if [[ -n "${CC_API_KEY:-}" ]]; then
+    echo "$CC_API_KEY"
+  elif [[ -f "$KEY_FILE" ]]; then
+    cat "$KEY_FILE"
+  else
+    echo "Error: No API key found." >&2
+    echo "Set CC_API_KEY or run: cc auth setup" >&2
+    exit 1
+  fi
+}
+
+api() {
+  local method="$1" path="$2"; shift 2
+  curl -sf -X "$method" "$BASE_URL$path" \
+    -H "Authorization: Bearer $(get_api_key)" \
+    -H "Content-Type: application/json" \
+    "$@"
+}
+cmd_help() {
+  cat <<'USAGE'
+cc — CuriousCirkits CLI
+
+Usage:
+  cc auth setup                         Set up API key via device flow
+  cc auth status                        Check API key and test connection
+  cc portfolios summary                 List all portfolios
+  cc portfolios content <portfolioId>   Get published HTML/CSS/themes
+  cc portfolios create --name "Name"    Create a new portfolio
+  cc portfolios delete <portfolioId>    Delete a portfolio
+  cc portfolios update <id> [--name N] [--subdomain S]  Update portfolio
+  cc portfolios get <portfolioId>       Get portfolio details
+  cc images list [--portfolio <id>]     List uploaded images
+  cc workflow get <portfolioId>         Get workflow state
+  cc domains search --name "Name"       Search available domains
+  cc domains list                       List domain bindings
+  cc workflow complete <id> <stepId>     Complete a workflow step
+  cc publish <portfolioId>              Publish (reads JSON payload from stdin)
+  cc images upload <file> <portfolioId> Upload an image
+  cc help                               Show this help
+USAGE
+}
+cmd_auth_setup() {
+  local resp code url device_code interval token
+  resp=$(curl -sf -X POST "$BASE_URL/api/auth/device/code" -H "Content-Type: application/json")
+  code=$(echo "$resp" | jq -r '.user_code')
+  url=$(echo "$resp" | jq -r '.verification_url')
+  device_code=$(echo "$resp" | jq -r '.device_code')
+  interval=$(echo "$resp" | jq -r '.interval // 5')
+  echo "Opening browser to authorize..."
+  echo "$url"
+  open "$url" 2>/dev/null || xdg-open "$url" 2>/dev/null || echo "Open this URL: $url"
+  echo "Waiting for approval..."
+  while true; do
+    sleep "$interval"
+    token=$(curl -sf -X POST "$BASE_URL/api/auth/device/token" \
+      -H "Content-Type: application/json" \
+      -d "{\"device_code\":\"$device_code\"}" 2>/dev/null || true)
+    if [[ -n "$token" ]] && echo "$token" | jq -e '.api_key' >/dev/null 2>&1; then
+      mkdir -p "$(dirname "$KEY_FILE")"
+      echo "$token" | jq -r '.api_key' > "$KEY_FILE"
+      chmod 600 "$KEY_FILE"
+      echo "API key saved to $KEY_FILE"
+      return
+    fi
+  done
+}
+cmd_auth_status() {
+  if [[ -n "${CC_API_KEY:-}" ]]; then
+    echo "Using API key from CC_API_KEY env var"
+  elif [[ -f "$KEY_FILE" ]]; then
+    echo "API key found at $KEY_FILE"
+  else
+    echo "No API key configured. Run: cc auth setup"
+    exit 1
+  fi
+  echo "Testing connection..."
+  if api GET /api/portfolios/summary > /dev/null 2>&1; then
+    echo "Connected to $BASE_URL"
+  else
+    echo "Failed to connect to $BASE_URL" >&2
+    exit 1
+  fi
+}
+
+cmd_portfolios_summary() {
+  api GET /api/portfolios/summary
+}
+
+cmd_portfolios_content() {
+  local portfolio_id="${1:?Usage: cc portfolios content <portfolioId>}"
+  api GET "/api/portfolios/$portfolio_id/content"
+}
+
+cmd_portfolios_get() {
+  local portfolio_id="${1:?Usage: cc portfolios get <portfolioId>}"
+  api GET "/api/portfolios/$portfolio_id"
+}
+
+cmd_portfolios_delete() {
+  local portfolio_id="${1:?Usage: cc portfolios delete <portfolioId>}"
+  api DELETE "/api/portfolios/$portfolio_id"
+}
+
+cmd_workflow_get() {
+  local portfolio_id="${1:?Usage: cc workflow get <portfolioId>}"
+  api GET "/api/workflow/$portfolio_id"
+}
+
+cmd_domains_search() {
+  local name="" budget="20"
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --name) name="$2"; shift 2 ;;
+      --budget) budget="$2"; shift 2 ;;
+      *) echo "Unknown option: $1" >&2; exit 1 ;;
+    esac
+  done
+  [[ -z "$name" ]] && { echo "Usage: cc domains search --name \"Name\" [--budget N]" >&2; exit 1; }
+  api POST /api/domains/search -d "{\"name\":\"$name\",\"budget\":$budget}"
+}
+
+cmd_domains_list() {
+  api GET /api/domains
+}
+
+cmd_portfolios_create() {
+  local name=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --name) name="$2"; shift 2 ;;
+      *) echo "Unknown option: $1" >&2; exit 1 ;;
+    esac
+  done
+  [[ -z "$name" ]] && { echo "Usage: cc portfolios create --name \"Name\"" >&2; exit 1; }
+  api POST /api/portfolios/create -H "Accept: application/json" -d "{\"name\":\"$name\"}"
+}
+
+cmd_workflow_complete() {
+  local portfolio_id="${1:?Usage: cc workflow complete <portfolioId> <stepId>}"
+  local step_id="${2:?Usage: cc workflow complete <portfolioId> <stepId>}"
+  api POST "/api/workflow/$portfolio_id" \
+    -d "{\"action\":\"complete\",\"step_id\":\"$step_id\"}"
+}
+
+cmd_publish() {
+  local portfolio_id="${1:?Usage: cc publish <portfolioId> (reads JSON from stdin)}"
+  local payload merged
+  payload=$(cat)
+  merged=$(echo "$payload" | jq -c ". + {\"portfolioId\":\"$portfolio_id\"}")
+  api POST /api/publish -d "$merged"
+}
+
+cmd_images_list() {
+  local portfolio_id=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --portfolio) portfolio_id="$2"; shift 2 ;;
+      *) echo "Unknown option: $1" >&2; exit 1 ;;
+    esac
+  done
+  if [[ -n "$portfolio_id" ]]; then
+    api GET "/api/images?portfolio_id=$portfolio_id"
+  else
+    api GET /api/images
+  fi
+}
+
+cmd_images_upload() {
+  local filepath="${1:?Usage: cc images upload <filepath> <portfolioId>}"
+  local portfolio_id="${2:?Usage: cc images upload <filepath> <portfolioId>}"
+  curl -sf -X POST "$BASE_URL/api/images" \
+    -H "Authorization: Bearer $(get_api_key)" \
+    -F "file=@$filepath" \
+    -F "portfolio_id=$portfolio_id"
+}
+
+cmd_portfolios_update() {
+  local portfolio_id="${1:?Usage: cc portfolios update <portfolioId> [--name \"Name\"] [--subdomain \"sub\"]}"
+  shift
+  local payload="{}"
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --name) payload=$(echo "$payload" | jq -c ". + {\"name\":\"$2\"}"); shift 2 ;;
+      --subdomain) payload=$(echo "$payload" | jq -c ". + {\"subdomain\":\"$2\"}"); shift 2 ;;
+      *) echo "Unknown option: $1" >&2; exit 1 ;;
+    esac
+  done
+  api PATCH "/api/portfolios/$portfolio_id" -d "$payload"
+}
+
+# --- Routing ---
+case "${1:-help}" in
+  auth)
+    case "${2:-}" in
+      setup)  cmd_auth_setup ;;
+      status) cmd_auth_status ;;
+      *)      echo "Usage: cc auth {setup|status}" >&2; exit 1 ;;
+    esac ;;
+  portfolios)
+    case "${2:-}" in
+      summary) cmd_portfolios_summary ;;
+      content) cmd_portfolios_content "${3:-}" ;;
+      get)     cmd_portfolios_get "${3:-}" ;;
+      delete)  cmd_portfolios_delete "${3:-}" ;;
+      update)  shift 2; cmd_portfolios_update "$@" ;;
+      create)  shift 2; cmd_portfolios_create "$@" ;;
+      *)       echo "Usage: cc portfolios {summary|content|get|delete|update|create}" >&2; exit 1 ;;
+    esac ;;
+  workflow)
+    case "${2:-}" in
+      get)      cmd_workflow_get "${3:-}" ;;
+      complete) cmd_workflow_complete "${3:-}" "${4:-}" ;;
+      *)        echo "Usage: cc workflow {get|complete} <id> [<stepId>]" >&2; exit 1 ;;
+    esac ;;
+  domains)
+    case "${2:-}" in
+      search) shift 2; cmd_domains_search "$@" ;;
+      list)   cmd_domains_list ;;
+      *)      echo "Usage: cc domains {search|list}" >&2; exit 1 ;;
+    esac ;;
+  publish)  cmd_publish "${2:-}" ;;
+  images)
+    case "${2:-}" in
+      list)   shift 2; cmd_images_list "$@" ;;
+      upload) cmd_images_upload "${3:-}" "${4:-}" ;;
+      *)      echo "Usage: cc images {list|upload}" >&2; exit 1 ;;
+    esac ;;
+  help|--help|-h) cmd_help ;;
+  *) echo "Unknown command: $1. Run 'cc help' for usage." >&2; exit 1 ;;
+esac
