@@ -30,6 +30,7 @@ csites — CuriousCirkits CLI
 Usage:
   csites auth setup                         Set up API key via device flow
   csites auth status                        Check API key and test connection
+  csites auth logout                        Remove API key
   csites portfolios summary                 List all portfolios
   csites portfolios content <portfolioId>   Get published HTML/CSS/themes
   csites portfolios create --name "Name"    Create a new portfolio
@@ -86,6 +87,15 @@ cmd_auth_status() {
   else
     echo "Failed to connect to $BASE_URL" >&2
     exit 1
+  fi
+}
+
+cmd_auth_logout() {
+  if [[ -f "$KEY_FILE" ]]; then
+    rm -f "$KEY_FILE"
+    echo "Logged out. API key removed."
+  else
+    echo "Not logged in."
   fi
 }
 
@@ -201,7 +211,8 @@ case "${1:-help}" in
     case "${2:-}" in
       setup)  cmd_auth_setup ;;
       status) cmd_auth_status ;;
-      *)      echo "Usage: csites auth {setup|status}" >&2; exit 1 ;;
+      logout) cmd_auth_logout ;;
+      *)      echo "Usage: csites auth {setup|status|logout}" >&2; exit 1 ;;
     esac ;;
   portfolios)
     case "${2:-}" in
